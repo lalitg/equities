@@ -7,19 +7,19 @@ $(document).ready(function() {
 function test(){
     $("#list_badges").simpletable({
         getURL : function(){
-            return "http://localhost:8080/ShareInvestmentForum/user/";
+            return "http://localhost:8080/ShareInvestmentForum/portfolio/";
         },
         dataFormatter : function(dataraw){
             return dataraw.data;
         },
         deleteURL : function(idPrime){
-           return "http://reqres.in/api/users/"+idPrime;
+           return "http://localhost:8080/ShareInvestmentForum/portfolio/"+idPrime;
         },
         editURL : function(idPrime){
-            return "http://reqres.in/api/users/"+idPrime;
+            return "http://localhost:8080/ShareInvestmentForum/portfolio/"+idPrime;
         },
         addURL : function(idPrime){
-            return "http://reqres.in/api/users";
+            return "http://localhost:8080/ShareInvestmentForum/portfolio/";
         },
         customRenderView : {
             avatar : function(rowNum, idPrime, dataValue){

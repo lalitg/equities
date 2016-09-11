@@ -1,6 +1,8 @@
 package com.sif.spring.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -14,108 +16,118 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.sif.spring.model.User;
-import com.sif.spring.service.UserService;
+import com.sif.spring.model.Portfolio;
+import com.sif.spring.service.PortfolioService;
 
 @RestController
 public class HelloWorldRestController {
 
 	@Autowired
-	UserService userService;  //Service which will do all data retrieval/manipulation work
+	PortfolioService portfolioService;  //Service which will do all data retrieval/manipulation work
 
 	
-	//-------------------Retrieve All Users--------------------------------------------------------
+	//-------------------Retrieve All Portfolios--------------------------------------------------------
 	
-	@RequestMapping(value = "/user/", method = RequestMethod.GET)
-	public ResponseEntity<List<User>> listAllUsers() {
-		List<User> users = userService.findAllUsers();
-		if(users.isEmpty()){
-			return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
+	@RequestMapping(value = "/portfolio/", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>> listAllPortfolios() {
+		List<Portfolio> portfolios = portfolioService.findAllPortfolios();
+		if(portfolios == null || portfolios.isEmpty()){
+			return new ResponseEntity<Map<String,Object>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
 		}
-		return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+		Map<String,Object> resp = new HashMap<String, Object>();
+		resp.put("page", "1");
+		resp.put("per_page", "3");
+		resp.put("total", "12");
+		resp.put("total_pages", "4");
+		resp.put("data", portfolios);
+		return new ResponseEntity<Map<String,Object>>(resp, HttpStatus.OK);
 	}
 
 
-	//-------------------Retrieve Single User--------------------------------------------------------
+	//-------------------Retrieve Single Portfolio--------------------------------------------------------
 	
-	@RequestMapping(value = "/user/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> getUser(@PathVariable("id") long id) {
-		System.out.println("Fetching User with id " + id);
-		User user = userService.findById(id);
-		if (user == null) {
-			System.out.println("User with id " + id + " not found");
-			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+	@RequestMapping(value = "/portfolio/{companyName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Map<String,Object>> getPortfolio(@PathVariable("companyName") String companyName) {
+		System.out.println("Fetching Portfolio with companyName " + companyName);
+		Portfolio portfolio = portfolioService.findByName(companyName);
+		if (portfolio == null) {
+			System.out.println("Portfolio with id " + companyName + " not found");
+			return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+		Map<String,Object> resp = new HashMap<String, Object>();
+		resp.put("data", portfolio);
+		return new ResponseEntity<Map<String,Object>>(resp, HttpStatus.OK);
 	}
 
 	
 	
-	//-------------------Create a User--------------------------------------------------------
+	//-------------------Create a Portfolio--------------------------------------------------------
 	
-	@RequestMapping(value = "/user/", method = RequestMethod.POST)
-	public ResponseEntity<Void> createUser(@RequestBody User user, 	UriComponentsBuilder ucBuilder) {
-		System.out.println("Creating User " + user.getName());
-
-		if (userService.isUserExist(user)) {
-			System.out.println("A User with name " + user.getName() + " already exist");
+	@RequestMapping(value = "/portfolio/", method = RequestMethod.POST)
+	public ResponseEntity<Void> createPortfolio(@RequestBody Portfolio portfolio, 	UriComponentsBuilder ucBuilder) {
+		System.out.println("Creating Portfolio " + portfolio.getCompanyName());
+        System.out.println(portfolio);
+		if (portfolioService.isPortfolioExist(portfolio)) {
+			System.out.println("A Portfolio with name " + portfolio.getCompanyName() + " already exist");
 			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
 		}
 
-		userService.saveUser(user);
+		portfolioService.savePortfolio(portfolio);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("/user/{id}").buildAndExpand(user.getId()).toUri());
+		headers.setLocation(ucBuilder.path("/Portfolio/{companyName}").buildAndExpand(portfolio.getCompanyName()).toUri());
 		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 	}
 
 	
-	//------------------- Update a User --------------------------------------------------------
+	//------------------- Update a Portfolio --------------------------------------------------------
 	
-	@RequestMapping(value = "/user/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody User user) {
-		System.out.println("Updating User " + id);
+	@RequestMapping(value = "/portfolio/{companyName}", method = RequestMethod.PUT)
+	public ResponseEntity<Portfolio> updatePortfolio(@PathVariable("companyName") String companyName, @RequestBody Portfolio portfolio) {
+		System.out.println("Updating Portfolio " + companyName);
 		
-		User currentUser = userService.findById(id);
+		Portfolio currentPortfolio = portfolioService.findByName(companyName);
 		
-		if (currentUser==null) {
-			System.out.println("User with id " + id + " not found");
-			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+		if (currentPortfolio==null) {
+			System.out.println("Portfolio with companyName " + companyName + " not found");
+			return new ResponseEntity<Portfolio>(HttpStatus.NOT_FOUND);
 		}
 
-		currentUser.setName(user.getName());
-		currentUser.setAge(user.getAge());
-		currentUser.setSalary(user.getSalary());
+		currentPortfolio.setInvestmentPrice(portfolio.getInvestmentPrice());
+		currentPortfolio.setLivePrice(portfolio.getLivePrice());
+		currentPortfolio.setQuantity(portfolio.getQuantity());
 		
-		userService.updateUser(currentUser);
-		return new ResponseEntity<User>(currentUser, HttpStatus.OK);
+		portfolioService.updatePortfolio(currentPortfolio);
+		return new ResponseEntity<Portfolio>(currentPortfolio, HttpStatus.OK);
 	}
 
-	//------------------- Delete a User --------------------------------------------------------
+	//------------------- Delete a Portfolio --------------------------------------------------------
 	
-	@RequestMapping(value = "/user/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<User> deleteUser(@PathVariable("id") long id) {
-		System.out.println("Fetching & Deleting User with id " + id);
+	@RequestMapping(value = "/portfolio/{companyName}", method = RequestMethod.DELETE)
+	public ResponseEntity<Portfolio> deletePortfolio(@PathVariable("companyName") String companyName) {
+		System.out.println("Fetching & Deleting Portfolio with id " + companyName);
 
-		User user = userService.findById(id);
-		if (user == null) {
-			System.out.println("Unable to delete. User with id " + id + " not found");
-			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+		Portfolio portfolio = portfolioService.findByName(companyName);
+		System.out.println(portfolio);
+		if (portfolio == null) {
+			System.out.println("Unable to delete. Portfolio with companyName " + companyName + " not found");
+			return new ResponseEntity<Portfolio>(HttpStatus.NOT_FOUND);
 		}
 
-		userService.deleteUserById(id);
-		return new ResponseEntity<User>(HttpStatus.NO_CONTENT);
+		portfolioService.deletePortfolioByName(companyName);
+		System.out.println(portfolioService.findAllPortfolios());
+		return new ResponseEntity<Portfolio>(HttpStatus.NO_CONTENT);
 	}
 
 	
-	//------------------- Delete All User --------------------------------------------------------
+	//------------------- Delete All Portfolio --------------------------------------------------------
 	
-	@RequestMapping(value = "/user/", method = RequestMethod.DELETE)
-	public ResponseEntity<User> deleteAllUsers() {
-		System.out.println("Deleting All Users");
+	@RequestMapping(value = "/portfolio/", method = RequestMethod.DELETE)
+	public ResponseEntity<Portfolio> deleteAllPortfolios() {
+		System.out.println("Deleting All Portfolios");
 
-		userService.deleteAllUsers();
-		return new ResponseEntity<User>(HttpStatus.NO_CONTENT);
+		portfolioService.deleteAllPortfolios();
+		return new ResponseEntity<Portfolio>(HttpStatus.NO_CONTENT);
 	}
 
 }

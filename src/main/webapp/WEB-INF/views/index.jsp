@@ -1,3 +1,4 @@
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,8 +10,13 @@
 <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-   <script type="text/javascript" src="/resources/jquery.simpletable.js"></script>
-   <script type="text/javascript" src="/resources/table.js"></script> 
+    
+    <spring:url value="/resources/jquery.simpletable.js" var="simpleTableJs" />
+	<spring:url value="/resources/table.js" var="tableJs" />
+    
+ <script src="${simpleTableJs}"></script>
+    <script src="${tableJs}"></script>
+   
    <style>
    body { background-color:#fafafa; font-family:'Roboto';}
    .container { margin:150px auto;}
@@ -36,10 +42,10 @@ google_ad_height = 90;
   <table class="table table-bordered table-striped table-fixed" id='list_badges'>
     <thead>
       <tr>
-        <th class="text-center" id="id" type="text" prime="true" static="true">company</th>
-        <th class="text-center" id="first_name" type="text">Live price</th>
-        <th class="text-center" id="last_name" type="text">Investment price</th>
-        <th class="text-center" id="avatar" type="text">Quantity</th>
+        <th class="text-center" id="companyName" type="text" prime="true" static="true">company</th>
+        <th class="text-center" id="investmentPrice" type="text">Investment price</th>
+        <th class="text-center" id="livePrice" type="text">Live price</th>
+        <th class="text-center" id="quantity" type="text">Quantity</th>
         <th>Edit</th>
         <th>Delete</th>
       </tr>

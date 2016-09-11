@@ -324,10 +324,13 @@
 				var valuePrimeId = elmPrimeId.find("input").val();
 				var dataAjax = getEditedData(rowElement);
 				$.ajax({
+					beforeSend: function(xhrObj){
+				        xhrObj.setRequestHeader("Content-Type","application/json");
+				    },
 	                url:opts.editURL(valuePrimeId),
 	                type:"PUT",
 	                processData: false,
-	                data: dataAjax,
+	                data: JSON.stringify(dataAjax),
 	                contentType: false,
 	                crossDomain: true,
 	                success : function(data,status){
@@ -369,10 +372,13 @@
 				//     console.log(pair[0]+ ', ' + pair[1]); 
 				// }
 				$.ajax({
-	                url:opts.addURL(valuePrimeId),
+					beforeSend: function(xhrObj){
+				        xhrObj.setRequestHeader("Content-Type","application/json");
+				    },
+	                url:opts.addURL(),
 	                type:"POST",
 	                processData: false,
-	                data: dataAjax,
+	                data: JSON.stringify(dataAjax),
 	                contentType: false,
 	                crossDomain: true,
 	                success : function(data,status){
